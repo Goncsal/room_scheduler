@@ -14,12 +14,11 @@ import {
   Select,
   MenuItem,
   TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Modal,
+  Paper,
+  IconButton,
 } from '@mui/material';
-import { QrCode, Visibility } from '@mui/icons-material';
+import { QrCode, Visibility, Close } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import { roomAPI, departmentAPI } from '../services/api';
 
@@ -225,45 +224,65 @@ const RoomsPage = () => {
         </Typography>
       )}
 
-      {/* QR Code Dialog */}
-      <Dialog 
-        open={qrDialog.open} 
+      {/* QR Code Modal */}
+      <Modal
+        open={qrDialog.open}
         onClose={() => setQrDialog({ open: false, room: null })}
-        aria-labelledby="qr-dialog-title"
-        aria-describedby="qr-dialog-description"
-        maxWidth="sm"
-        fullWidth
-        disableRestoreFocus={false}
-        keepMounted={false}
+        aria-labelledby="qr-modal-title"
+        aria-describedby="qr-modal-description"
       >
-        <DialogTitle id="qr-dialog-title">
-          QR Code for {qrDialog.room?.name}
-        </DialogTitle>
-        <DialogContent id="qr-dialog-description">
-          {qrDialog.room?.qr_code_url ? (
-            <Box sx={{ textAlign: 'center', p: 2 }}>
-              <img 
-                src={qrDialog.room.qr_code_url} 
-                alt={`QR Code for ${qrDialog.room.name}`}
-                style={{ maxWidth: '100%', height: 'auto' }}
-              />
-              <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                Scan to view room schedule
-              </Typography>
-            </Box>
-          ) : (
-            <Typography>QR Code not available</Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button 
-            onClick={() => setQrDialog({ open: false, room: null })}
-            autoFocus
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: { xs: '90%', sm: 400 },
+            maxWidth: 500,
+          }}
+        >
+          <Paper
+            sx={{
+              p: 3,
+              outline: 'none',
+              position: 'relative',
+            }}
           >
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <IconButton
+              onClick={() => setQrDialog({ open: false, room: null })}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+              }}
+              aria-label="Close QR code modal"
+            >
+              <Close />
+            </IconButton>
+            
+            <Typography id="qr-modal-title" variant="h6" component="h2" sx={{ mb: 2, pr: 4 }}>
+              QR Code for {qrDialog.room?.name}
+            </Typography>
+            
+            <Box id="qr-modal-description">
+              {qrDialog.room?.qr_code_url ? (
+                <Box sx={{ textAlign: 'center' }}>
+                  <img 
+                    src={qrDialog.room.qr_code_url} 
+                    alt={`QR Code for ${qrDialog.room.name}`}
+                    style={{ maxWidth: '100%', height: 'auto' }}
+                  />
+                  <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
+                    Scan to view room schedule
+                  </Typography>
+                </Box>
+              ) : (
+                <Typography>QR Code not available</Typography>
+              )}
+            </Box>
+          </Paper>
+        </Box>
+      </Modal>
     </Container>
   );
 };
