@@ -237,23 +237,21 @@ npm run build
 - **Solution**: Updated requirements.txt includes gunicorn now
 - **Fix**: Push latest code with `git push origin main`
 
-### "Can't Access /admin" on Railway
-- **Problem**: No admin user exists in production database
+### "Can't Access /admin" on Railway - FIXED!
+- **Problem**: No admin user exists in production database + missing SECRET_KEY
 - **Solution**: Railway uses fresh PostgreSQL database (not your local SQLite)
-- **Fix**: Add admin creation to your deployment script:
 
-**Option 1: Update Railway Environment Variables (Recommended)**
+**✅ REQUIRED: Add These Environment Variables in Railway**
 1. Go to Railway dashboard → Your project → Variables
-2. Add these environment variables:
+2. Add these **4 REQUIRED** environment variables:
    ```
    DJANGO_SETTINGS_MODULE=room_scheduler.production_settings
+   SECRET_KEY=django-insecure-your-50-char-random-secret-key-here-abc123xyz789
    DJANGO_SUPERUSER_USERNAME=admin
-   DJANGO_SUPERUSER_EMAIL=admin@example.com  
-   DJANGO_SUPERUSER_PASSWORD=your-secure-password
-   SECRET_KEY=your-django-secret-key-here
+   DJANGO_SUPERUSER_PASSWORD=YourSecurePassword123
    ```
-3. Push your latest code: `git push origin main`
-4. Railway will automatically redeploy
+3. Railway will automatically redeploy (check logs for "Superuser created successfully")
+4. Visit `/admin` and login with admin/YourSecurePassword123
 
 **Option 2: Use Railway Console**
 1. Go to Railway dashboard → Your project
@@ -277,7 +275,18 @@ npm run build
   - `DJANGO_SETTINGS_MODULE=room_scheduler.production_settings`
   - `SECRET_KEY=your-generated-secret-key`
 
-### Frontend Shows "API Connection Error"
+### Frontend Shows "API Connection Error" or No Data - COMMON ISSUE!
+- **Problem**: Frontend can't connect to Railway backend API
 - **Check**: Your Railway backend is running (visit the Railway URL directly)
-- **Check**: `REACT_APP_API_URL` environment variable in Vercel
-- **Check**: No trailing slash in API URL
+- **Check**: `REACT_APP_API_URL` environment variable in Vercel settings
+- **Format**: Must be `https://your-railway-url.up.railway.app/api` (include `/api` at the end)
+- **No trailing slash**: Don't add extra `/` at the end
+- **Redeploy**: After changing environment variables, redeploy your Vercel project
+
+**Steps to Fix:**
+1. Find your Railway URL: Railway dashboard → Settings → Domains
+2. Go to Vercel → Your project → Settings → Environment Variables
+3. Set `REACT_APP_API_URL` = `https://your-railway-url.up.railway.app/api`
+4. Redeploy your Vercel project
+
+forcing a redeploy from vercel.
