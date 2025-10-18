@@ -9,7 +9,7 @@ DEBUG = False
 
 # Security
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-production-secret-key-here')
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')  # Allow Railway domains
 
 # Database - Use PostgreSQL in production
 if os.environ.get('DATABASE_URL'):

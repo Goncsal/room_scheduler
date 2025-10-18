@@ -9,6 +9,22 @@ pip install -r requirements-production.txt
 # Run migrations
 python manage.py migrate
 
+# Create superuser if it doesn't exist
+python manage.py shell -c "
+from django.contrib.auth.models import User
+import os
+
+username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
+email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')
+password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'admin123')
+
+if not User.objects.filter(username=username).exists():
+    User.objects.create_superuser(username=username, email=email, password=password)
+    print(f'Superuser {username} created')
+else:
+    print('Superuser already exists')
+"
+
 # Create sample data if database is empty
 python manage.py shell -c "
 from rooms.models import Room

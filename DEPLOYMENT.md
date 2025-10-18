@@ -24,21 +24,70 @@
    git push -u origin main
    ```
 
-2. **Deploy Backend**:
-   - Go to [Railway.app](https://railway.app)
-   - Connect your GitHub repo
-   - Select "Deploy from GitHub repo"
-   - Railway will automatically detect Django and install requirements
-   - Set environment variable: `DJANGO_SETTINGS_MODULE=room_scheduler.production_settings`
+2. **Deploy Backend to Railway**:
+   - Go to [Railway.app](https://railway.app) and sign up/login
+   - Click "New Project" → "Deploy from GitHub repo"
+   - Connect your GitHub account and select your repository
+   - Railway will automatically detect Django and start building
+   - **Wait for deployment to complete** (2-3 minutes)
+   - **Copy your Railway URL**: Look for a URL like `https://your-app-name-production-xxxx.up.railway.app`
+   - Set environment variables in Railway dashboard:
+     - `DJANGO_SETTINGS_MODULE` = `room_scheduler.production_settings`
+     - `SECRET_KEY` = `your-secret-key-here` (generate a new one)
 
-3. **Deploy Frontend**:
-   - Go to [Vercel.com](https://vercel.com)
-   - Import your GitHub repo
-   - Set build command: `cd frontend && npm run build`
-   - Set output directory: `frontend/build`
-   - Set environment variable: `REACT_APP_API_URL=https://your-railway-backend-url.up.railway.app`
+3. **Deploy Frontend to Vercel**:
+   - Go to [Vercel.com](https://vercel.com) and sign up/login
+   - Click "New Project" → Import your GitHub repo
+   - Configure project:
+     - **Root Directory**: `frontend`
+     - **Build Command**: `npm run build`
+     - **Output Directory**: `build`
+   - **Add Environment Variable**:
+     - Name: `REACT_APP_API_URL`
+     - Value: `https://your-actual-railway-url.up.railway.app` (the FREE auto-generated URL from Railway)
+   - Click "Deploy"
 
 **Result**: Your app will be live on the web! 🎉
+
+## 🔍 How to Find Your Railway URL
+
+After deploying to Railway, you'll get a URL automatically generated. Here's where to find it:
+
+### Method 1: Railway Dashboard
+1. Go to your Railway project dashboard
+2. Click on your deployed service
+3. Look for the **"Deployments"** tab
+4. Your URL will be shown like: `https://room-scheduler-production-xxxx.up.railway.app`
+
+### Method 2: Settings Tab
+1. In your Railway project
+2. Click **"Settings"** tab
+3. Look for **"Domains"** section
+4. Your auto-generated domain is listed there
+
+### Method 3: Copy from Deployment Logs
+1. When Railway finishes deploying
+2. Check the deployment logs
+3. Look for a line like: `Deployed to https://your-app-name.up.railway.app`
+
+**Important**: Use this exact URL (including `https://`) in your Vercel environment variable!
+
+## 💡 Domain Clarification
+
+**You DON'T need to buy a custom domain!** 
+
+### What Railway Gives You FREE:
+- **Auto-generated URL**: `https://room-scheduler-production-1a2b3c.up.railway.app`
+- **Fully functional**: Works exactly like a custom domain
+- **HTTPS included**: Secure by default
+- **No setup required**: Generated automatically when you deploy
+
+### Custom Domain (Optional):
+- **Only if you want**: `https://yourname.com` instead of the Railway URL
+- **Costs money**: You'd need to buy a domain name (~$10-15/year)
+- **Not necessary**: The Railway URL works perfectly for your app
+
+**For your project: Just use the FREE Railway-generated URL!**
 
 ## Local Development
 
@@ -180,3 +229,47 @@ npm run build
 - **QR Codes**: Need persistent file storage or cloud storage (AWS S3)
 - **Two Apps**: Backend and frontend deploy separately
 - **CORS**: Must configure backend to accept requests from frontend domain
+
+## 🚨 Common Issues & Solutions
+
+### "Can't Access /admin" on Railway
+- **Problem**: No admin user exists in production database
+- **Solution**: Railway uses fresh PostgreSQL database (not your local SQLite)
+- **Fix**: Add admin creation to your deployment script:
+
+**Option 1: Update Railway Environment Variables**
+1. Go to Railway dashboard → Your project → Variables
+2. Add these environment variables:
+   ```
+   DJANGO_SUPERUSER_USERNAME=admin
+   DJANGO_SUPERUSER_EMAIL=admin@example.com  
+   DJANGO_SUPERUSER_PASSWORD=your-secure-password
+   ```
+3. Redeploy your app
+
+**Option 2: Use Railway Console**
+1. Go to Railway dashboard → Your project
+2. Click "Console" or "Shell"
+3. Run: `python manage.py createsuperuser`
+4. Follow the prompts
+
+### "Can't find Railway URL"
+- **Solution**: Wait for Railway deployment to complete first
+- **Look for**: A URL ending in `.up.railway.app`
+- **Location**: Railway dashboard → Your project → Settings → Domains
+
+### "CORS Error" between Frontend and Backend
+- **Problem**: Frontend can't connect to backend API
+- **Solution**: Check that `REACT_APP_API_URL` in Vercel matches your Railway URL exactly
+- **Format**: Must include `https://` (e.g., `https://your-app.up.railway.app`)
+
+### "500 Error" on Railway
+- **Problem**: Django settings issue
+- **Solution**: Check environment variables in Railway:
+  - `DJANGO_SETTINGS_MODULE=room_scheduler.production_settings`
+  - `SECRET_KEY=your-generated-secret-key`
+
+### Frontend Shows "API Connection Error"
+- **Check**: Your Railway backend is running (visit the Railway URL directly)
+- **Check**: `REACT_APP_API_URL` environment variable in Vercel
+- **Check**: No trailing slash in API URL
