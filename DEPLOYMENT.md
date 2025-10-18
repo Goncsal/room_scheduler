@@ -232,20 +232,28 @@ npm run build
 
 ## 🚨 Common Issues & Solutions
 
+### "gunicorn: command not found" Error
+- **Problem**: Railway can't find gunicorn to run Django
+- **Solution**: Updated requirements.txt includes gunicorn now
+- **Fix**: Push latest code with `git push origin main`
+
 ### "Can't Access /admin" on Railway
 - **Problem**: No admin user exists in production database
 - **Solution**: Railway uses fresh PostgreSQL database (not your local SQLite)
 - **Fix**: Add admin creation to your deployment script:
 
-**Option 1: Update Railway Environment Variables**
+**Option 1: Update Railway Environment Variables (Recommended)**
 1. Go to Railway dashboard → Your project → Variables
 2. Add these environment variables:
    ```
+   DJANGO_SETTINGS_MODULE=room_scheduler.production_settings
    DJANGO_SUPERUSER_USERNAME=admin
    DJANGO_SUPERUSER_EMAIL=admin@example.com  
    DJANGO_SUPERUSER_PASSWORD=your-secure-password
+   SECRET_KEY=your-django-secret-key-here
    ```
-3. Redeploy your app
+3. Push your latest code: `git push origin main`
+4. Railway will automatically redeploy
 
 **Option 2: Use Railway Console**
 1. Go to Railway dashboard → Your project
