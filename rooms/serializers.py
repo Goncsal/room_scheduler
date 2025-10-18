@@ -27,9 +27,41 @@ class RoomSerializer(serializers.ModelSerializer):
         ]
 
     def get_qr_code_url(self, obj):
-        if obj.qr_code:
-            return obj.qr_code.url
-        return None
+        # Generate QR code as base64 data URL for cloud deployment
+        import qrcode
+        from io import BytesIO
+        import base64
+        
+        try:
+            # Create QR code
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            
+            # Use Vercel frontend URL for production or localhost for development
+            frontend_url = "https://room-scheduler-gray.vercel.app"
+            room_url = f"{frontend_url}/room/{obj.id}/schedule"
+            qr.add_data(room_url)
+            qr.make(fit=True)
+
+            # Create QR code image
+            qr_image = qr.make_image(fill_color="black", back_color="white")
+            
+            # Convert to base64
+            buffer = BytesIO()
+            qr_image.save(buffer, format='PNG')
+            buffer.seek(0)
+            
+            # Return as data URL
+            img_str = base64.b64encode(buffer.getvalue()).decode()
+            return f"data:image/png;base64,{img_str}"
+            
+        except Exception as e:
+            print(f"Error generating QR code for room {obj.id}: {e}")
+            return None
 
     def get_current_schedule(self, obj):
         from schedules.serializers import ScheduleSerializer
