@@ -1,29 +1,31 @@
 #!/bin/bash
-# Deployment script for cloud platforms
+# Post-deployment script for Railway
 
-echo "Starting deployment..."
-
-# Install production requirements
-pip install -r requirements-production.txt
+echo "Running post-deployment setup..."
 
 # Run migrations
 python manage.py migrate
 
-# Create superuser if it doesn't exist
-python manage.py shell -c "
+# Create superuser if environment variables are set
+if [ ! -z "$DJANGO_SUPERUSER_USERNAME" ]; then
+    python manage.py shell -c "
 from django.contrib.auth.models import User
 import os
 
-username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
+username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
 email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')
-password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'admin123')
+password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
 
-if not User.objects.filter(username=username).exists():
-    User.objects.create_superuser(username=username, email=email, password=password)
-    print(f'Superuser {username} created')
+if username and password:
+    if not User.objects.filter(username=username).exists():
+        User.objects.create_superuser(username=username, email=email, password=password)
+        print(f'Superuser {username} created')
+    else:
+        print('Superuser already exists')
 else:
-    print('Superuser already exists')
+    print('No superuser credentials provided')
 "
+fi
 
 # Create sample data if database is empty
 python manage.py shell -c "
@@ -36,7 +38,4 @@ else:
     print('Database already populated')
 "
 
-# Collect static files
-python manage.py collectstatic --noinput
-
-echo "Deployment complete!"
+echo "Setup complete!"
