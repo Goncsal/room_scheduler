@@ -1,6 +1,6 @@
 # 🏫 University Room Scheduler
 
-I built this Django + React app to solve the common problem of managing university room schedules. Students and staff can scan QR codes to instantly check room availability and upcoming classes - no more standing around wondering if a room is free!
+I built this Django + React app to as practice for a bigger project (Projeto Engenharia Informática). In which i got to know more about some key components of Django, qrcodes generation and others, which will come in handy for the real thing.
 
 ## 🚀 Live Demo
 
