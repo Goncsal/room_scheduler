@@ -22,11 +22,15 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_TZ = True
 
 # Database - Use PostgreSQL in production
-if os.environ.get('DATABASE_URL'):
+DATABASE_URL = os.environ.get('DATABASE_URL')
+print(f"DATABASE_URL exists: {bool(DATABASE_URL)}")  # Debug logging
+
+if DATABASE_URL:
     import dj_database_url
     DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+        'default': dj_database_url.parse(DATABASE_URL)
     }
+    print(f"Using PostgreSQL database: {DATABASES['default']['NAME']}")
 else:
     # Fallback to SQLite for development
     DATABASES = {
@@ -35,6 +39,21 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    print("WARNING: Using SQLite fallback - data will not persist on Railway!")
+
+# Ensure database connections don't timeout and set proper options
+if 'postgresql' in DATABASES['default']['ENGINE']:
+    DATABASES['default'].update({
+        'CONN_MAX_AGE': 60,
+        'OPTIONS': {
+            'connect_timeout': 10,
+        }
+    })
+else:
+    # For SQLite
+    DATABASES['default'].update({
+        'CONN_MAX_AGE': 0,  # Don't reuse connections for SQLite
+    })
 
 # CORS settings for production
 CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'https://room-scheduler-gray.vercel.app,http://localhost:3000').split(',')
