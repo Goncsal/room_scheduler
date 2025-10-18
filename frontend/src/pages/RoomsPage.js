@@ -226,11 +226,20 @@ const RoomsPage = () => {
       )}
 
       {/* QR Code Dialog */}
-      <Dialog open={qrDialog.open} onClose={() => setQrDialog({ open: false, room: null })}>
-        <DialogTitle>
+      <Dialog 
+        open={qrDialog.open} 
+        onClose={() => setQrDialog({ open: false, room: null })}
+        aria-labelledby="qr-dialog-title"
+        aria-describedby="qr-dialog-description"
+        maxWidth="sm"
+        fullWidth
+        disableRestoreFocus={false}
+        keepMounted={false}
+      >
+        <DialogTitle id="qr-dialog-title">
           QR Code for {qrDialog.room?.name}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent id="qr-dialog-description">
           {qrDialog.room?.qr_code_url ? (
             <Box sx={{ textAlign: 'center', p: 2 }}>
               <img 
@@ -247,7 +256,10 @@ const RoomsPage = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setQrDialog({ open: false, room: null })}>
+          <Button 
+            onClick={() => setQrDialog({ open: false, room: null })}
+            autoFocus
+          >
             Close
           </Button>
         </DialogActions>

@@ -27,7 +27,11 @@ else:
     }
 
 # CORS settings for production
-CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'https://room-scheduler-gray.vercel.app,http://localhost:3000').split(',')
+
+# Additional CORS settings for better compatibility
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False  # Set to True only for debugging
 
 # Static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
