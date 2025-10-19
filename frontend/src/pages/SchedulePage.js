@@ -24,15 +24,19 @@ import {
   Select,
   MenuItem,
   Box,
+  Tabs,
+  Tab,
 } from '@mui/material';
-import { Add, Edit, Delete } from '@mui/icons-material';
+import { Add, Edit, Delete, ViewWeek, List } from '@mui/icons-material';
 import { scheduleAPI, roomAPI } from '../services/api';
+import Timetable from '../components/Timetable';
 
 const SchedulePage = () => {
   const [schedules, setSchedules] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
+  const [viewMode, setViewMode] = useState(0); // 0 = timetable, 1 = list
   const [formData, setFormData] = useState({
     room: '',
     title: '',
@@ -136,6 +140,10 @@ const SchedulePage = () => {
     }));
   };
 
+  const handleScheduleClick = (schedule) => {
+    handleEdit(schedule);
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'scheduled': return 'primary';
@@ -169,72 +177,97 @@ const SchedulePage = () => {
         </Button>
       </Box>
 
-      {/* Schedules Table */}
-      <Card>
-        <CardContent>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Room</TableCell>
-                  <TableCell>Title</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Time</TableCell>
-                  <TableCell>Instructor</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {schedules.map((schedule) => (
-                  <TableRow key={schedule.id}>
-                    <TableCell>
-                      {schedule.room_name} ({schedule.room_number})
-                    </TableCell>
-                    <TableCell>{schedule.title}</TableCell>
-                    <TableCell>{schedule.date}</TableCell>
-                    <TableCell>
-                      {schedule.start_time} - {schedule.end_time}
-                    </TableCell>
-                    <TableCell>{schedule.instructor || '-'}</TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={schedule.status} 
-                        color={getStatusColor(schedule.status)}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Button 
-                        size="small" 
-                        onClick={() => handleEdit(schedule)}
-                        startIcon={<Edit />}
-                        sx={{ mr: 1 }}
-                      >
-                        Edit
-                      </Button>
-                      <Button 
-                        size="small" 
-                        color="error"
-                        onClick={() => handleDelete(schedule.id)}
-                        startIcon={<Delete />}
-                      >
-                        Delete
-                      </Button>
-                    </TableCell>
+      {/* View Mode Tabs */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs value={viewMode} onChange={(e, newValue) => setViewMode(newValue)}>
+          <Tab 
+            icon={<ViewWeek />} 
+            label="Timetable View" 
+            iconPosition="start"
+          />
+          <Tab 
+            icon={<List />} 
+            label="List View" 
+            iconPosition="start"
+          />
+        </Tabs>
+      </Box>
+
+      {/* Content based on view mode */}
+      {viewMode === 0 ? (
+        // Timetable View
+        <Timetable 
+          schedules={schedules} 
+          onScheduleClick={handleScheduleClick}
+        />
+      ) : (
+        // List View (existing table)
+        <Card>
+          <CardContent>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Room</TableCell>
+                    <TableCell>Title</TableCell>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Time</TableCell>
+                    <TableCell>Instructor</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Actions</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          
-          {schedules.length === 0 && (
-            <Typography variant="body1" color="textSecondary" align="center" sx={{ py: 4 }}>
-              No schedules found. Create your first schedule to get started.
-            </Typography>
-          )}
-        </CardContent>
-      </Card>
+                </TableHead>
+                <TableBody>
+                  {schedules.map((schedule) => (
+                    <TableRow key={schedule.id}>
+                      <TableCell>
+                        {schedule.room_name} ({schedule.room_number})
+                      </TableCell>
+                      <TableCell>{schedule.title}</TableCell>
+                      <TableCell>{schedule.date}</TableCell>
+                      <TableCell>
+                        {schedule.start_time} - {schedule.end_time}
+                      </TableCell>
+                      <TableCell>{schedule.instructor || '-'}</TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={schedule.status} 
+                          color={getStatusColor(schedule.status)}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button 
+                          size="small" 
+                          onClick={() => handleEdit(schedule)}
+                          startIcon={<Edit />}
+                          sx={{ mr: 1 }}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          size="small" 
+                          color="error"
+                          onClick={() => handleDelete(schedule.id)}
+                          startIcon={<Delete />}
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            
+            {schedules.length === 0 && (
+              <Typography variant="body1" color="textSecondary" align="center" sx={{ py: 4 }}>
+                No schedules found. Create your first schedule to get started.
+              </Typography>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>

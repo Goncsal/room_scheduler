@@ -16,14 +16,18 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Tabs,
+  Tab,
 } from '@mui/material';
-import { QrCode, Schedule, Edit } from '@mui/icons-material';
+import { QrCode, Schedule, Edit, ViewWeek, List } from '@mui/icons-material';
 import { roomAPI } from '../services/api';
+import Timetable from '../components/Timetable';
 
 const RoomDetailPage = () => {
   const { id } = useParams();
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState(0); // 0 = timetable, 1 = list
 
   useEffect(() => {
     fetchRoom();
@@ -188,49 +192,75 @@ const RoomDetailPage = () => {
           </Grid>
         )}
 
-        {/* Upcoming Schedules */}
+        {/* Room Schedules */}
         <Grid item xs={12}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Upcoming Schedules
+                Room Schedule
               </Typography>
+              
+              {/* View Mode Tabs */}
+              <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+                <Tabs value={viewMode} onChange={(e, newValue) => setViewMode(newValue)}>
+                  <Tab 
+                    icon={<ViewWeek />} 
+                    label="Timetable View" 
+                    iconPosition="start"
+                  />
+                  <Tab 
+                    icon={<List />} 
+                    label="List View" 
+                    iconPosition="start"
+                  />
+                </Tabs>
+              </Box>
+
               {room.schedules && room.schedules.length > 0 ? (
-                <TableContainer component={Paper} variant="outlined">
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Date</TableCell>
-                        <TableCell>Time</TableCell>
-                        <TableCell>Title</TableCell>
-                        <TableCell>Instructor</TableCell>
-                        <TableCell>Status</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {room.schedules.map((schedule) => (
-                        <TableRow key={schedule.id}>
-                          <TableCell>{schedule.date}</TableCell>
-                          <TableCell>
-                            {schedule.start_time} - {schedule.end_time}
-                          </TableCell>
-                          <TableCell>{schedule.title}</TableCell>
-                          <TableCell>{schedule.instructor || '-'}</TableCell>
-                          <TableCell>
-                            <Chip 
-                              label={schedule.status} 
-                              color={getStatusColor(schedule.status)}
-                              size="small"
-                            />
-                          </TableCell>
+                viewMode === 0 ? (
+                  // Timetable View
+                  <Timetable 
+                    schedules={room.schedules} 
+                    onScheduleClick={() => {}} // Read-only for room detail
+                  />
+                ) : (
+                  // List View
+                  <TableContainer component={Paper} variant="outlined">
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Date</TableCell>
+                          <TableCell>Time</TableCell>
+                          <TableCell>Title</TableCell>
+                          <TableCell>Instructor</TableCell>
+                          <TableCell>Status</TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                      </TableHead>
+                      <TableBody>
+                        {room.schedules.map((schedule) => (
+                          <TableRow key={schedule.id}>
+                            <TableCell>{schedule.date}</TableCell>
+                            <TableCell>
+                              {schedule.start_time} - {schedule.end_time}
+                            </TableCell>
+                            <TableCell>{schedule.title}</TableCell>
+                            <TableCell>{schedule.instructor || '-'}</TableCell>
+                            <TableCell>
+                              <Chip 
+                                label={schedule.status} 
+                                color={getStatusColor(schedule.status)}
+                                size="small"
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )
               ) : (
                 <Typography color="textSecondary">
-                  No upcoming schedules
+                  No schedules available for this room
                 </Typography>
               )}
             </CardContent>
